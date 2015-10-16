@@ -1,0 +1,714 @@
+----------------- RSA CON FIRMAS DIGITALES--------------
+
+MAIN
+
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include "RSA.h"  
+#include "funciones.h"
+#include <math.h>
+using namespace std;
+void print (vector<long long>& vector_)
+{
+  for (int i = 0; i < vector_.size (); i++)
+    cout << vector_[i] << " ";
+  cout << endl;
+}
+void print_s (vector<string>& vector_)
+{
+  for (int i = 0; i < vector_.size (); i++)
+    cout << vector_[i] << " ";
+  cout << endl;
+}
+string read_file (char * file_name)
+{
+   ifstream Ar (file_name);
+   char buffer [100000];
+   while (!Ar.eof())
+   {
+      Ar.getline (buffer , 100000 , '\0');
+   }
+   return buffer;
+}
+void write_file (string archivo , char * file)
+{
+   ofstream Ar (file);
+   Ar << archivo;
+}
+ 
+
+int main(int argc, char *argv[])
+{     
+//string nombre = "sas";
+//write_file(nombre , "prueba.txt");
+  // write_file()
+         
+           // /*
+         // EMISOR (Cifrando mensaje)
+         RSA emisor;
+         emisor.set_E(197); // AKI va el "e" del que va a ver el mensaje mensaje q le voy a enviar
+         emisor.set_N(2059); // AKI va el "N" del que va a ver el mensaje mensaje q le voy a enviar
+         string mi_mensaje = "1 El buen humor es una de las mejores prendas de vestir con las que puede cubrirse nuestra sociedad, William Makepeace";
+
+         string nombre = "V";
+         
+         string cifrado = emisor.Cifrado(mi_mensaje);
+         cout << "Mensaje cifrado sin firma: " << cifrado << endl;
+         
+         emisor.set_N(58039);  // Aki va mi "N" para cifrar mi apellido
+         emisor.set_D(29987);  // Aki va mi "D" para cifrar mi apellido
+         string mi_firma = emisor.Firma(cifrado , nombre);
+         cout << "Mensaje cifrado con firma "<< mi_firma << endl;
+         write_file(mi_firma , "mensajito.txt");
+         
+           //*/
+         
+            /*
+         
+         // Receptor (Decifrando mensaje)
+         RSA receptor;
+         string m_cifrado = "19440038611836829914096911253218626091341149502946250230294622704151162147400812025922997208202098251511927730081500096011181030502997208202237971100215281082021841023332006111886825578111811670918887"; // Este es el mensaje q he recibido para decifrarlo
+         receptor.set_N(); // Aki va el "N" del emisor
+        vector <string> total = receptor.Division(m_cifrado);
+        print_s(total);
+        receptor.set_N(58039); // Aki va mi "N"  para decifrar solo el mensaje
+        receptor.set_D(29987); // Aki va mi "D" para decifrar solo el mensaje
+        vector <long long> deci = receptor.Decifrado(total);
+        receptor.set_E();  //  Aki va el "E" del emisor para decifrar el mensaje y su apellido
+        receptor.set_N(); // Aki va el "N" del emisor para decifrar el mensaje y su apellido 
+        vector <long long> deci_final = receptor.Decifrado_Firma(deci , total);
+        print(deci_final);
+        string aa = receptor.Letras(deci_final);
+        cout <<"Mensaje y firma decifrado: " << aa << endl;
+         
+           */
+                   
+          
+ 
+    
+    system("PAUSE");
+    return EXIT_SUCCESS;
+}
+
+
+---
+
+
+RSA.H
+
+#ifndef RSA_H
+#define RSA_H
+#include <iostream>
+#include <vector>
+using namespace std;
+class RSA
+{
+	
+    long long p;
+    long long q;
+    long long d;
+    string alfabeto;
+    long long e;
+    long long N;
+    public:
+        RSA();
+        vector <long long> Generar_Claves ();
+        void Claves ();
+        long long get_p();
+        long long get_q();
+        long long get_e();
+        long long get_N();
+        long long get_D();
+        void set_p (long long num);
+        void set_q (long long num);
+        void set_E (long long num);
+        void set_N (long long num);
+        void set_D (long long num);
+        int Digitos_Alfa();
+        vector <long long> TextToNum (string mensaje);
+        // CIFRADOS USANDO BLOQUES
+        
+        // Funciones del Emisor
+        string Cifrado (string mensaje);
+        long long Decifrado_Resto_Chino (long long Cifras);
+        string Firma (string m_cifrado , string nom);
+        
+        
+        // Funciones del Receptor
+        string Letras (vector <long long> cifra);
+        vector <string> Division (string mensaje_cifrado);
+        vector <long long> Decifrado (vector <string> Cifrados);
+        
+        vector <long long> Decifrado_Firma (vector <long long> m_decifrado , vector <string> Cifrados);
+    
+        //vector <long long>Decifrado_Resto_Chino (vector <long long> Cifras);
+        
+        // CIFRADOS Y DECIFRADOS SIN USAR BLOQUES 
+        
+        
+		~RSA();
+};
+#endif  
+
+---
+
+
+RSA.CPP
+
+#include "rsa.h"  
+#include <vector>
+#include "funciones.h"  
+RSA::RSA()
+{
+   //alfabeto = "abcdefghijklmnÒopqrstuvwxyzABCDEFGHIJKLMN—OPQRSTUVWXYZ·ÈÌÛ˙¡…Õ”⁄ ,;:.-_/ø?°!&=\"*0123456789";
+   alfabeto = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "; 
+}
+
+ RSA::~RSA(){}
+ 
+vector <long long> RSA :: Generar_Claves ()
+{
+  long long  phi_n ;  
+  vector <long long> claves;
+  Funciones auxiliares;
+      p = auxiliares.Generar_Aleatorio();
+      q = auxiliares.Generar_Aleatorio();
+      N = p * q;
+      phi_n = (p-1)* (q-1);
+      e = auxiliares.Generar_Aleatorio();
+       while(e < 1 && e > phi_n)
+       {
+        e = auxiliares.Generar_Aleatorio();
+       }
+       d = auxiliares.Inversa (phi_n , e);
+    claves.push_back(N);
+    claves.push_back(e);
+    claves.push_back(d);
+    claves.push_back(q);
+    claves.push_back(p);
+  return claves;
+  }
+
+void RSA :: Claves ()
+{
+  vector <long long> key = Generar_Claves ();
+  N = key [0];
+  e = key [1];
+  d = key [2];
+  p = key [3];
+  q = key [4];
+}
+long long RSA :: get_p()
+{
+  return p;
+}
+long long RSA :: get_q()
+{
+  return q;
+}
+long long RSA :: get_e()
+{
+  return e;
+}
+long long RSA :: get_N()
+{
+  return N;
+}
+long long RSA :: get_D()
+{
+  return d;
+}
+void RSA :: set_p (long long num)
+{
+  p = num;
+}
+void RSA :: set_q (long long num)
+{
+  q = num;
+}
+void RSA :: set_E (long long num)
+{
+  e = num;
+}
+void RSA :: set_N (long long num)
+{
+  N = num;
+}
+void RSA :: set_D (long long num)
+{
+   d = num;  
+}
+
+vector <long long> RSA :: TextToNum (string mensaje)  
+{
+   vector <long long> result;
+   for (int i = 0 ; i < mensaje.length() ; i++)
+   {
+      result.push_back(alfabeto.find(mensaje[i]));
+   }
+   return result;
+}
+int RSA :: Digitos_Alfa()
+{
+    Funciones aux;
+    long long longitud = alfabeto.length();
+    int resultado = aux.Numero_Digitos(longitud);
+    return resultado;
+}
+
+
+
+string RSA :: Cifrado (string mensaje)
+{
+   Funciones my_functions;
+   //int num_digitos_alfa = 2;
+   int num_digitos_alfa = Digitos_Alfa();
+   vector <long long> new_msj =  TextToNum (mensaje);  
+   string msj_str = my_functions.Vector_String (new_msj , num_digitos_alfa);
+   int bloques = my_functions.Numero_Digitos(N) - 1;
+   vector <long long> msj_a_cifrar = my_functions.Converter (msj_str , bloques);
+   int longitud = msj_a_cifrar.size();
+   long long aux1;
+   long long aux2;
+   vector <long long> msj_cifrado;
+   for (int i = 0 ; i < longitud ; i++)
+   {
+       aux1 = msj_a_cifrar[i];
+       aux2 = my_functions.exponenciacion(aux1 , e , N);
+       msj_cifrado.push_back(aux2);
+   }
+   long long digitos_N = my_functions.Numero_Digitos(N);   
+   // Primera parte
+   string new_msj_cifrado = my_functions.Vector_String (msj_cifrado , digitos_N);
+   
+   
+   
+   return new_msj_cifrado;      
+}
+long long RSA :: Decifrado_Resto_Chino (long long Cifras)
+{
+     long long resultado;
+   Funciones auxiliar;
+   //long long longitud = Cifras.size();
+   long long aux_p = auxiliar.resto (d , (p-1));
+   long long aux_q = auxiliar.resto (d , (q-1));
+   long long p1 = q;
+   long long p2 = p;
+   long long q1 = auxiliar.q_resto(p1 , p);
+   long long q2 = auxiliar.q_resto(p2 , q);
+   long long result , valor , dp , dq , v_aux;
+   //for (int i = 0 ; i < longitud ; i++)
+   //{
+      //valor = Cifras [i];                                 
+      dp = auxiliar.exponenciacion(Cifras , aux_p , p);
+      dq = auxiliar.exponenciacion(Cifras , aux_q , q);
+      v_aux = (dp * p1 * q1) + (dq * p2 * q2);
+      result = auxiliar.resto(v_aux , N);
+      //resultado.push_back(result);      
+   //}
+   return result;
+}
+string RSA :: Firma (string m_cifrado , string nom)
+{
+  Funciones aux;
+  int auxiliar = alfabeto.find(nom);   
+  vector <long long> v;
+  long long v1 = aux.exponenciacion(auxiliar , d , N );   
+  v.push_back(v1);
+  long long v2 = aux.Numero_Digitos(N);
+   string new_nom = aux.Vector_String (v , v2);
+   string cifrado_firma = m_cifrado + new_nom;
+   return cifrado_firma;
+}
+/*string RSA :: Firma (string m_cifrado , string nom)
+{
+  Funciones aux;
+  long long auxiliar = alfabeto.find(nom);   
+  vector <long long> v;
+  
+  //long long v1 = aux.exponenciacion(auxiliar , d , N );   
+  long long v1 = Decifrado_Resto_Chino (auxiliar);
+  v.push_back(v1);
+  long long v2 = aux.Numero_Digitos(N);
+   string new_nom = aux.Vector_String (v , v2);
+   string cifrado_firma = m_cifrado + new_nom;
+   return cifrado_firma;
+}
+*/
+
+string RSA :: Letras (vector <long long> cifra)
+{
+   int tam = cifra.size();
+   string tmp;
+   for (int i = 0 ; i < tam ; i++)
+     tmp.push_back(alfabeto[cifra[i]]);
+   return tmp;
+}
+vector <string> RSA :: Division (string mensaje_cifrado)
+{
+    Funciones auxiliares;
+    int digi = auxiliares.Numero_Digitos(N);
+    string men_aux , men_aux2;
+    string final , fir;
+    int i = mensaje_cifrado.size()-digi;
+    int j = 0;
+    int longitud = mensaje_cifrado.size();
+    int longitud2 = mensaje_cifrado.size() - digi;
+    for (i , j ; i < longitud ; i++ , j++)
+    {
+        men_aux = mensaje_cifrado [i];
+        fir.insert(j , men_aux);
+    }
+    for (int k = 0 ; k < longitud2 ; k++)
+    {
+        men_aux2 = mensaje_cifrado [k];
+        final.insert(k , men_aux2);
+    }
+    vector <string> resultado;
+    resultado.push_back(final);
+    resultado.push_back(fir);
+    return resultado;
+}
+
+vector <long long> RSA :: Decifrado (vector <string> Cifrados)
+{
+   Funciones my_functions;
+   string Cifras , mi_firma;
+   Cifras = Cifrados [0];
+   //mi_firma = Cifrados [1]; 
+   
+   int bloques = my_functions.Numero_Digitos(N);
+   vector <long long> cifra_a_num = my_functions.Converter (Cifras , bloques);
+   long long longitud = cifra_a_num.size();
+   long long aux1;
+   long long aux2;
+   vector <long long> result_previo;
+   for (int i = 0 ; i < longitud ; i++)
+   {
+       aux1 = cifra_a_num[i];
+       aux2 = my_functions.exponenciacion(aux1 , d , N);
+       result_previo.push_back(aux2);
+   }   
+   string new_resultado_previo = my_functions.Vector_String (result_previo , bloques - 1);
+   //int num_digitos_alfa = 2;
+   int num_digitos_alfa = Digitos_Alfa();
+   vector <long long> decifrado = my_functions.Converter (new_resultado_previo , num_digitos_alfa);
+   
+   // Decifrado firnma
+   
+   
+    /*
+      mi_aux = Vec[j];
+     auxiliar = atoi(mi_aux.c_str());
+    */
+   
+   return decifrado;
+}
+
+
+
+
+vector <long long> RSA :: Decifrado_Firma (vector <long long> m_decifrado , vector <string> Cifrados)
+{
+   Funciones my_functions;
+   vector <long long> Decifrado_Final;
+   string  mi_firma , aux;
+   vector <long long> res;
+   mi_firma = Cifrados [1]; 
+   long long auxiliar , la_firma;
+   int longitud_firma = mi_firma.length();
+   for (int i = 0 ; i < longitud_firma ; i++)
+   {
+       aux = mi_firma [i];
+       auxiliar = atoi(aux.c_str());
+       res.push_back(auxiliar);
+   }
+   la_firma = my_functions.Vec_to_Num (res);
+   /*long long deci_firma = Decifrado_Resto_Chino (la_firma);
+   Decifrado_Final = m_decifrado;
+   Decifrado_Final.push_back(deci_firma);*/
+   long long deci_firma = my_functions.exponenciacion(la_firma , e , N);
+   Decifrado_Final = m_decifrado;
+   Decifrado_Final.push_back(deci_firma);
+   return Decifrado_Final;
+    
+}
+ 
+
+
+
+// CIFRADOS Y DECIFRADOS SIN BLOQUES
+
+
+
+/*
+vector <long long> RSA :: Decifrado_Resto_Chino (vector <long long> Cifras)
+{
+   vector <long long> resultado;
+   Funciones auxiliar;
+   long long longitud = Cifras.size();
+   long long aux_p = auxiliar.resto (d , (p-1));
+   long long aux_q = auxiliar.resto (d , (q-1));
+   long long p1 = q;
+   long long p2 = p;
+   long long q1 = auxiliar.q_resto(p1 , p);
+   long long q2 = auxiliar.q_resto(p2 , q);
+   long long result , valor , dp , dq , v_aux;
+   for (int i = 0 ; i < longitud ; i++)
+   {
+      valor = Cifras [i];                                 
+      dp = auxiliar.exponenciacion(valor , aux_p , p);
+      dq = auxiliar.exponenciacion(valor , aux_q , q);
+      v_aux = (dp * p1 * q1) + (dq * p2 * q2);
+      result = auxiliar.resto(v_aux , N);
+      resultado.push_back(result);      
+   }
+   return resultado;
+}
+*/
+
+----
+
+FUNCIONES.H
+
+#ifndef FUNCIONES_H
+#define FUNCIONES_H
+#include <vector>
+#include <iostream>
+#include <sstream>
+#include <math.h>
+using namespace std;
+class Funciones
+{
+	public:
+ 
+		Funciones();
+		long long potencia (long long num1 , long long num2);
+        long long mcd (long long a , long long b);
+        long long exponenciacion (long long a , long long p , long long n);
+        vector <long long> Euclides_Extendido(long long a , long long b);
+        long long Inversa (long long mod , long long a);
+        bool es_Primo (long long numero);
+        vector <long long> primos (long long r);
+        long long rdtsc();
+        long long Generar_Aleatorio ();         
+        int Numero_Digitos (long long num);
+        long long resto (long long num1 , long long num2);
+        string Vector_String (vector <long long> vec , long long r); 
+        long long Vec_to_Num (vector <long long> valores);
+        vector <long long> Converter (string Vec , int bloques);
+        long long q_resto (long long p1 , long long mod);
+		~Funciones();
+};
+#endif  
+
+---
+
+FUNCIONES.CPP
+
+#include "funciones.h"  
+Funciones::Funciones() {}
+Funciones::~Funciones() {}
+
+long long Funciones :: potencia (long long num1 , long long num2)
+{
+    long long r = 1;
+    for (long long i = 0 ; i < num2; i++)
+    {
+        r = r * num1;
+    }
+    return r;
+}
+
+long long Funciones :: mcd (long long a , long long b)
+{
+   if (b > a) return mcd (b , a);
+   if (b == 0) return a;
+   if ((a % 2 == 0) && (b % 2 == 0)) return 2 * mcd (a/2 , b/2);
+   if ((a % 2 == 0) && (b % 2 != 0)) return mcd (a/2 , b);
+   if ((a % 2 != 0) && (b % 2 == 0)) return mcd (a , b/2);
+   else return mcd ((a-b)/2 , b);
+}
+
+long long Funciones ::  exponenciacion (long long a , long long p , long long n)
+{
+   long long t;
+    if(p == 0)
+        return 1;
+    if(p % 2 == 0){
+        t = exponenciacion(a, p/2, n);
+        return (potencia(t, 2)) % n;
+        }
+    t = exponenciacion(a, (p-1)/2, n);
+    return (a*(potencia(t, 2) % n)) % n;
+}
+
+vector <long long> Funciones :: Euclides_Extendido(long long a , long long b)
+{
+  long long i = 0;
+    vector <long long> k, n, q, r, vec;
+    k.push_back (a);
+    n.push_back (b);
+    do{
+        q.push_back (k[i] / n[i]);
+        r.push_back (k[i] - q[i] * n[i]);
+        k.push_back (n[i]);
+        n.push_back (r[i]);
+        i++;
+    }while (r[i-1] != 0);
+    i--;
+    vec.push_back (n[i]);
+    vector <long long> x (i+1), z (i+1);
+    long long a1,b1;
+    x[i] = 0;
+    z[i] = 1;
+    i--;
+    while(i >= 0){
+        x[i] = z[i+1];
+        z[i] = x[i+1] - q[i]*z[i+1];         
+        a1 = x[i], b1 = z[i];
+        i--;
+    }
+    vec.push_back (a1);
+    vec.push_back (b1);
+    return vec;
+}
+
+long long Funciones :: Inversa (long long mod , long long a)
+{
+     vector <long long> inv = Euclides_Extendido(mod , a);
+     long long inver =  inv[2];
+     if (inver < 0)
+     {
+        inver = mod + inver;
+        return inver;
+     }
+     else return inver;
+}
+ 
+bool Funciones :: es_Primo (long long numero)
+ {
+      int y;
+    if (numero <= 2 && numero >= 0)
+        return true;
+    else{
+        y = exponenciacion (2,numero-1,numero);
+        if (y  == 1)
+            return true;
+    }
+    return false;
+ }
+ 
+ vector <long long> Funciones :: primos (long long r)
+ {
+   vector <long long> tmp;
+    int a = 2;
+    for (int i = 0 ; i < r; ++i){
+        if (es_Primo(a))
+            tmp.push_back (a);
+        a++;
+    }
+    return tmp;
+
+ }
+
+long long Funciones :: rdtsc()
+{
+    __asm__ __volatile__("rdtsc");
+}
+
+long long Funciones :: Generar_Aleatorio ()
+{   
+    srand(rdtsc());
+    vector <long long> n = primos (1000);
+    long long a =  rand() % (n.size());
+    return n[a];
+}
+
+int Funciones :: Numero_Digitos (long long num)
+{
+     int c = 1;
+    while (num >= 10)
+        c++, num = num /10;
+    return c;
+}
+
+long long Funciones :: resto (long long num1 , long long num2)
+{
+     long long result = num1 % num2;
+     return result;
+} 
+
+string Funciones :: Vector_String (vector <long long> vec , long long r)
+{
+  string aux;
+  Funciones auxi;
+  long long x = (auxi.potencia(10 , r-1));
+  long long y = auxi.Numero_Digitos (x);
+  for (int i = 0 ; i < vec.size() ; ++i)
+  {
+      string s;
+      stringstream out;
+      out << vec [i];
+      s = out.str();
+      long long ti = auxi.Numero_Digitos (vec [i]);
+      while (ti < y)
+      {
+        s.insert(0 , "0");
+        ti++;
+      }
+      aux += s ;
+  }
+  return aux;
+}
+
+long long Funciones :: Vec_to_Num (vector <long long> valores)
+{
+   long long aux = 0;
+   long long resultado;
+   int longitud = valores.size();
+   int auxiliar = longitud-1;
+   for (int i = 0 ; i < longitud ; i++)
+   {  
+     resultado = valores[i] * potencia(10 , auxiliar);
+     auxiliar--;
+     aux = resultado + aux; 
+   }
+   return aux;
+}
+
+vector <long long> Funciones :: Converter (string Vec , int bloques)
+{
+       int longitud = Vec.length();
+       vector <long long> result_bloques;
+       vector <long long> result_converter;
+       long long auxiliar;
+       string mi_aux;
+       long long convertido;
+       for (int i = 0 ; i < longitud ; i = i + bloques)
+       {
+          for (int j = i ; j < i + bloques ; j++)
+          {
+              mi_aux = Vec[j];
+              auxiliar = atoi(mi_aux.c_str());
+              result_bloques.push_back(auxiliar);
+          }
+          convertido = Vec_to_Num (result_bloques);
+          result_converter.push_back(convertido);
+          result_bloques.clear();         
+       }
+       return result_converter;
+  }
+
+long long Funciones :: q_resto (long long p1 , long long mod)
+{
+  long long q = 1;
+  p1 = resto (p1 , mod);
+  while(resto((q*p1)-1 , mod) != 0)
+  {
+     q++;
+  }
+  return q;
+}
+
