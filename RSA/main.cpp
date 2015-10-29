@@ -12,16 +12,42 @@ using namespace std;
 
 int main()
 {
-	
-	cout << "Hello World!" << endl;
-   /*
-	ZZ x;
-	x = RandomBnd(1234567890123456789);
-	cout << x << endl;
-	*/
+	/*RSA obj(20);
+   string mensaje = "hola mundo";
+   Vec<ZZ> mensaje_cifrado;
+   mensaje_cifrado =  obj.cifrar_sin_bloques(mensaje);
+   for(int i=0; i<mensaje_cifrado.length(); i++)
+      cout << mensaje_cifrado[i] << " ";
+   cout << endl;*/
 
-   Generador g(20);
-   cout << g.aleatorio_simple() << endl ;
+   int numero_bits = 24;
+   RSA receptor(numero_bits);
+   Vec<ZZ> claves;
+   claves = receptor.generar_claves();
+   ZZ  N, E, D;
+   N = claves[0];
+   E = claves[1];
+   D = claves[2];
+
+
+   RSA emisor(E,N);
+   string mensaje = "hola mundo";
+   Vec<ZZ> mensaje_cifrado;
+   mensaje_cifrado =  emisor.cifrar_sin_bloques(mensaje);
+   
+
+   string mensaje_decifrado = receptor.decifrar_sin_bloques(mensaje_cifrado);
+
+
+
+
+
+
+
+
+
+
+
 
 
 /*

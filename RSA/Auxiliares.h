@@ -48,6 +48,74 @@ bool es_Primo (ZZ numero)
     return false;
  }
 
+ Vec<ZZ> Euclides_Extendido(ZZ a , ZZ b)
+{
+  int i;
+  i = 0;
+    Vec <ZZ> k, n, q, r, vec;
+    k.append(a);
+    n.append(b);
+    
+    do{
+     
+        q.append(k[i] / n[i]);
+        r.append(k[i] - q[i] * n[i]);
+        k.append(n[i]);
+        n.append(r[i]);
+        i++;
+    }while (r[i-1] != 0);
+    i--;
+    vec.append(n[i]);
+    Vec <ZZ> x , z; 
+    x.SetLength(i+1);
+    z.SetLength(i+1);
+            
+    ZZ a1,b1;
+    x[i] = 0;
+    z[i] = 1;
+    i--;
+    
+    while(i >= 0)
+    {
+        x[i] = z[i+1];
+        z[i] = x[i+1] - q[i]*z[i+1];         
+        a1 = x[i];
+        b1 = z[i];
+        i--;
+    }
+    vec.append(a1);
+    vec.append(b1);
+    return vec;    
+}
+
+ZZ Inversa(ZZ mod, ZZ a)
+{
+  Vec <ZZ> inv; 
+  inv = Euclides_Extendido(mod , a);
+  ZZ inver;
+  inver =  inv[2];
+  if (inver < 0)     
+     {
+        inver = mod + inver;
+        return inver;
+     }
+   else return inver;
+}
+
+Vec<ZZ> Text_to_Num(string alfabeto, string mensaje)
+{
+   Vec<ZZ> result;
+
+   for(int i=0; i<mensaje.length(); i++) 
+   {
+     ZZ numero;
+     numero = alfabeto.find(mensaje[i]);
+     result.append(numero);
+   }
+   return result;        
+}
+
+
 
 
 #endif
