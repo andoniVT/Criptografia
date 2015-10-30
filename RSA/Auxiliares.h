@@ -3,6 +3,8 @@
 
 #include <NTL/ZZ.h>
 #include <NTL/vector.h>
+#include <sstream>
+#include <string>
 
 using namespace NTL;
 
@@ -115,7 +117,112 @@ Vec<ZZ> Text_to_Num(string alfabeto, string mensaje)
    return result;        
 }
 
+string Num_to_Text(string alfabeto, Vec<ZZ> mensaje)
+{
+   int tam = mensaje.length();
+   string tmp;
+   for(int i=0; i<tam; i++)
+   {
+      ZZ value;
+      value =  mensaje[i];
+      long  val;
+      conv(val, value);
+      tmp.push_back(alfabeto[val]);   
+   }
+   return tmp;
+}
 
+ZZ Numero_Digitos(ZZ num)
+{
+    ZZ c;
+    c=1;
+    while(num>=10)
+    {
+        c++;
+        num = num/10;
+    }
+    return c;
+}
+
+ZZ Digitos_Alfabeto(string alfabeto)
+{
+  ZZ longitud;
+  longitud = alfabeto.length();
+  ZZ result;
+  result = Numero_Digitos(longitud);  
+  return result;
+}
+
+string Vector_String(Vec<ZZ> vec, ZZ r)
+{
+    string auxiliar="";
+    ZZ x , y , aux;
+    aux = 10;
+    x = potencia (aux , r-1);    
+    y = Numero_Digitos(x);
+    for(int i=0; i<vec.length(); i++)
+    {
+        string s;
+        stringstream buffer;
+        buffer << vec[i];
+        s = buffer.str();
+        ZZ ti;
+        ti = Numero_Digitos(vec[i]);
+        
+        while(ti<y)
+        {
+            s.insert(0, "0");
+            ti++;
+        }
+        auxiliar+=s;
+    }
+    return auxiliar;
+}
+
+ZZ Vec_Num(Vec<ZZ> valores)
+{
+    ZZ aux , resultado , pot;
+    pot=10;
+    aux=0;
+    int longitud = valores.length() , auxiliar = longitud-1;
+    ZZ value;
+    conv(value, auxiliar);
+    for(int i=0; i<longitud; i++)
+    {
+        resultado = valores[i] * potencia(pot, value);
+        auxiliar--;
+        aux = resultado + aux;
+    }
+    return aux;
+}
+
+
+Vec<ZZ> Converter(string vec, ZZ bloques)
+{
+    int bloquess; 
+    conv(bloquess, bloques);    
+    int longitud = vec.length();
+    Vec<ZZ> result_bloques, result_converter;
+    ZZ auxiliar , convertido;
+    string mi_aux;
+    
+    for(int i=0; i<longitud; i=i+bloquess)
+    {
+        for(int j=i; j<i+bloquess; j++)
+        {
+            if(j>=longitud) break;
+
+            mi_aux = vec[j];            
+            conv(auxiliar, mi_aux.c_str());
+            //cout << mi_aux <<" - " << auxiliar << endl;            
+            result_bloques.append(auxiliar);
+        }
+        convertido = Vec_Num(result_bloques);        
+        result_converter.append(convertido);
+        result_bloques.SetLength(0);
+    }
+    return result_converter;
+}
 
 
 #endif

@@ -12,13 +12,7 @@ using namespace std;
 
 int main()
 {
-	/*RSA obj(20);
-   string mensaje = "hola mundo";
-   Vec<ZZ> mensaje_cifrado;
-   mensaje_cifrado =  obj.cifrar_sin_bloques(mensaje);
-   for(int i=0; i<mensaje_cifrado.length(); i++)
-      cout << mensaje_cifrado[i] << " ";
-   cout << endl;*/
+
 
    int numero_bits = 24;
    RSA receptor(numero_bits);
@@ -31,12 +25,22 @@ int main()
 
 
    RSA emisor(E,N);
-   string mensaje = "hola mundo";
+   string mensaje = "hola jorge andoni valverde tohalino";
    Vec<ZZ> mensaje_cifrado;
+   //string mensaje_cifrado;
    mensaje_cifrado =  emisor.cifrar_sin_bloques(mensaje);
+   //mensaje_cifrado = emisor.cifrar_con_bloques(mensaje);
+
+   //cout << mensaje_cifrado << endl;
    
 
-   string mensaje_decifrado = receptor.decifrar_sin_bloques(mensaje_cifrado);
+   //string mensaje_decifrado = receptor.decifrar_sin_bloques(mensaje_cifrado);
+   //cout << mensaje_decifrado << endl ;
+
+   //string mensaje_decifrado = receptor.decifrar_con_bloques(mensaje_cifrado);
+   //cout << mensaje_decifrado << endl;
+
+   
 
 
 
