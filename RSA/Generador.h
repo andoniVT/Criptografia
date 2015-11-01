@@ -29,10 +29,17 @@ Generador::Generador(int _bits)
 
 ZZ Generador::aleatorio_simple()
 {
+  ZZ abajo , arriba, valor1 , valor2 , aux;
+  valor1 = 2;
+  conv(valor2, bits);  
+  aux = potencia (valor1 , valor2);
+  abajo = aux/2;
+  arriba = aux-1;  
   ZZ x;  
   while(true)
   {
-  	x = RandomBnd(1234567890123456789); 
+  	//x = RandomBnd(1234567890123456789); 
+    x = generar_aleatorio(abajo, arriba);
   	if(es_Primo(x))
   		return x;
   }

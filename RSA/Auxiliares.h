@@ -8,6 +8,15 @@
 
 using namespace NTL;
 
+
+ZZ generar_aleatorio(ZZ abajo, ZZ arriba)
+{
+    ZZ x;
+    x = RandomBnd(arriba);        
+    if(x < abajo) x = x + abajo; 
+    return x;
+}
+
 ZZ potencia (ZZ num1 , ZZ num2)
 {
     ZZ r;
@@ -132,6 +141,11 @@ string Num_to_Text(string alfabeto, Vec<ZZ> mensaje)
    return tmp;
 }
 
+char Find(string alfabeto, int posicion)
+{    
+    return alfabeto[posicion];
+}
+
 ZZ Numero_Digitos(ZZ num)
 {
     ZZ c;
@@ -223,6 +237,34 @@ Vec<ZZ> Converter(string vec, ZZ bloques)
     }
     return result_converter;
 }
+
+ZZ String_Num(string numero)
+{
+   ZZ result;
+   conv(result, numero.c_str());
+   return result;
+}
+
+string Num_String(ZZ numero)
+{
+    string result;     
+    stringstream buffer;
+    buffer << numero;
+    result = buffer.str();
+    return result;
+}
+
+string auto_completar(string value, int n)
+{
+    int faltan = n - value.length();
+    string result = "";
+    for(int i=0; i<faltan; i++)
+    {
+        result+="0";
+    }
+    return result + value;
+}
+
 
 
 #endif

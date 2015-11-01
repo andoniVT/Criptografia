@@ -40,7 +40,7 @@ RSA::RSA(int _numero_bits)
 {
   numero_bits = _numero_bits;
   //mis_claves = generar_claves();
-  alfabeto = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";  
+  alfabeto = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";  
 
 }
 
@@ -48,7 +48,7 @@ RSA::RSA(ZZ _E, ZZ _N)
 {
    E = _E;
    N = _N;
-   alfabeto = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+   alfabeto = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 }
 
 Vec<ZZ> RSA::generar_claves()
@@ -58,19 +58,26 @@ Vec<ZZ> RSA::generar_claves()
     Q =  g.aleatorio_simple();
     N = P * Q ;
     phiN = (P-1) * (Q-1);
-    E = g.aleatorio_simple();
-    
+    E = g.aleatorio_simple();    
     while(E<1 && E>phiN)
       E = g.aleatorio_simple();
     D = Inversa(phiN, E);  
     Vec<ZZ> claves;
+
+    /*
+    cout << "p: " << P << endl;
+    cout << "q: " << Q << endl;
+    cout << "e: " << E << endl;
+    cout << "N: " << N << endl;
+    */
+
+
     claves.append(N); 
     claves.append(E);
     claves.append(D);    
     return claves;
 }
 
-//string RSA::cifrar_sin_bloques(string mensaje)
 Vec<ZZ> RSA::cifrar_sin_bloques(string mensaje)
 {
    Vec<ZZ> new_mensaje = Text_to_Num(alfabeto, mensaje);   
@@ -93,36 +100,45 @@ string RSA::cifrar_con_bloques(string mensaje)
    ZZ digitos_alfabeto;
    digitos_alfabeto =  Digitos_Alfabeto(alfabeto);
    Vec<ZZ> new_msj;
-   new_msj = Text_to_Num(alfabeto, mensaje);      
-   //cout << new_msj << endl;
-   string msj_str =  Vector_String(new_msj, digitos_alfabeto);   
-   
-   
+   new_msj = Text_to_Num(alfabeto, mensaje);         
+   string msj_str =  Vector_String(new_msj, digitos_alfabeto);       
    ZZ bloques , uno;
    uno=1;   
    bloques = Numero_Digitos(N)-uno;
-   
-   Vec<ZZ> msj_a_cifrar;
-  
-   msj_a_cifrar = Converter(msj_str, bloques);
-   //for(int i=0; i<msj_a_cifrar.length(); i++) cout << msj_a_cifrar[i] << " ";
-    //cout << endl;
-
-   int longitud = msj_a_cifrar.length();
-   ZZ aux1 , aux2;
-   Vec<ZZ> msj_cifrado;
-
-   for(int i=0; i<longitud; i++)
+   int num_bloques;
+   conv(num_bloques, bloques);   
+   int longitud_mensaje = msj_str.length();
+    int index_mensaje = 0;
+    Vec<string> bloquecitos;
+   for(int i=0; i<longitud_mensaje; i=i+num_bloques)
    {
-      aux1 = msj_a_cifrar[i];
-      aux2 = exponenciacion(aux1, E, N);
-      msj_cifrado.append(aux2);
+     string bloque_auxiliar="";
+     for(int j=0; j<num_bloques; j++)
+     {
+        if(index_mensaje<longitud_mensaje)
+        {          
+          bloque_auxiliar+= msj_str[index_mensaje];
+          index_mensaje++;
+        }
+        else
+        {         
+          bloque_auxiliar+="0";
+        }
+     }
+     bloquecitos.append(bloque_auxiliar);     
    }
 
-   ZZ digitos_N;
-   digitos_N = Numero_Digitos(N);
-   string new_msj_cifrado = Vector_String(msj_cifrado, digitos_N);
-
+   string new_msj_cifrado ="";
+   for(int i=0; i<bloquecitos.length(); i++)
+   {      
+      ZZ bloque_value ;
+      bloque_value = String_Num(bloquecitos[i]);      
+      ZZ bloque_cifrado;
+      bloque_cifrado = exponenciacion(bloque_value, E, N);      
+      string bloque_cifrado_string = Num_String(bloque_cifrado);      
+      string bloque_cifrado_completado = auto_completar(bloque_cifrado_string, num_bloques+1);      
+      new_msj_cifrado+= bloque_cifrado_completado;
+   }  
    return new_msj_cifrado;
 }
 
@@ -132,7 +148,7 @@ string RSA::decifrar_sin_bloques(Vec<ZZ> mensaje_cifrado)
    for(int i=0; i<mensaje_cifrado.length(); i++)
    {
      ZZ value;
-     value = exponenciacion(mensaje_cifrado[i], D, N);
+     value = exponenciacion(mensaje_cifrado[i], E, N);
      results.append(value);
 
    }   
@@ -144,31 +160,48 @@ string RSA::decifrar_sin_bloques(Vec<ZZ> mensaje_cifrado)
 string RSA::decifrar_con_bloques(string mensaje_cifrado)
 {
    ZZ bloques = Numero_Digitos(N);
-   Vec<ZZ> cifra_a_num ;
-   cifra_a_num = Converter(mensaje_cifrado, bloques);
-   
-    int  longitud = cifra_a_num.length();
-    ZZ aux1, aux2;
-    Vec<ZZ> result_previo;
-    for(int i=0; i<longitud; i++)
-    {
-      aux1 = cifra_a_num[i];
-      aux2 = exponenciacion(aux1, D, N);
-      result_previo.append(aux2);
-    }
-
-    string new_resultado_previo = Vector_String(result_previo, bloques-1);
-    ZZ digitos_alfabeto;
-    digitos_alfabeto = Digitos_Alfabeto(alfabeto);
-    Vec<ZZ> decifrado;
-    decifrado = Converter(new_resultado_previo, digitos_alfabeto);
-   for(int i=0; i<decifrado.length();i++) cout << decifrado[i] << " "; 
-
-    string res = Num_to_Text(alfabeto, decifrado);
-    cout << res << endl;
-
-    cout << endl;
-    return "decifrado";
+   int num_bloques;
+   conv(num_bloques, bloques);   
+   int longitud_mensaje = mensaje_cifrado.length();
+   int index = 0;
+   string decifrados="";
+   for(int i=0; i<longitud_mensaje; i=i+num_bloques)
+   {
+      string bloquecito =""; 
+      for(int j=0; j<num_bloques; j++)
+      {         
+         bloquecito+=mensaje_cifrado[index];
+         index++;
+      }      
+      ZZ valor_bloquecito;
+      valor_bloquecito = String_Num(bloquecito);      
+      ZZ valor_bloquecito_decifrado;
+      valor_bloquecito_decifrado = exponenciacion(valor_bloquecito, D, N);            
+      string valor_bloquecito_decifrado_string = Num_String(valor_bloquecito_decifrado);       
+      string valor_bloquecito_decifrado_string_autocompletado = auto_completar(valor_bloquecito_decifrado_string, num_bloques-1);      
+      decifrados+=valor_bloquecito_decifrado_string_autocompletado;
+   }
+   ZZ digitos_alfabeto = Digitos_Alfabeto(alfabeto);   
+   int digitos;
+   conv(digitos, digitos_alfabeto);   
+   index = 0;   
+   string mensaje_decifrado="";
+   for(int i=0; i<decifrados.length(); i=i+digitos)
+   {
+      string value=""; 
+      for(int j=0; j<digitos; j++)
+      {         
+         value+=decifrados[index];
+         index++;
+      }      
+      ZZ posicion;
+      posicion = String_Num(value);  
+      int val_posicion;
+      conv(val_posicion, posicion);              
+      char a = Find(alfabeto, val_posicion);
+      mensaje_decifrado+=a;
+   }    
+    return mensaje_decifrado;
 }
 
 void RSA::set_E(ZZ numero)
