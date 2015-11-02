@@ -40,7 +40,8 @@ RSA::RSA(int _numero_bits)
 {
   numero_bits = _numero_bits;
   //mis_claves = generar_claves();
-  alfabeto = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";  
+  //alfabeto = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";  
+  alfabeto = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,;:.-_/?!&=0123456789()"; 
 
 }
 
@@ -48,7 +49,7 @@ RSA::RSA(ZZ _E, ZZ _N)
 {
    E = _E;
    N = _N;
-   alfabeto = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+   alfabeto = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,;:.-_/?!&=0123456789()";
 }
 
 Vec<ZZ> RSA::generar_claves()

@@ -5,8 +5,31 @@
 #include <NTL/vector.h>
 #include <sstream>
 #include <string>
-
+#include <iostream>
+#include <fstream>
 using namespace NTL;
+
+string read_file(const char* filename)
+{
+   string data;
+   ifstream infile;
+   infile.open(filename);
+   string result = "";
+   while(!infile.eof())
+   {
+      infile >> data;
+      result+= data + " " ; 
+   }   
+   infile.close(); 
+   return result; 
+}
+
+void write_file(const char* filename, string data)
+{
+   ofstream outfile;
+   outfile.open(filename);
+   outfile << data << endl;
+}
 
 
 ZZ generar_aleatorio(ZZ abajo, ZZ arriba)
@@ -164,6 +187,7 @@ ZZ Digitos_Alfabeto(string alfabeto)
   longitud = alfabeto.length();
   ZZ result;
   result = Numero_Digitos(longitud);  
+  cout << result << endl;
   return result;
 }
 
